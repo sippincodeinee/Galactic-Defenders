@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Game settings
+    const canvasWidth = 800;
+    const canvasHeight = 600;
+    const playerColor = "#00BFFF";
+    const enemyColor = "#FF0000";
+    const bulletColor = "#FFFF00";
+    const playerSpeed = 5;
+    const bulletSpeed = 10;
+    const enemySpeed = 3;
+
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    // Player setup
+    const playerWidth = 50;
+    const playerHeight = 50;
+    let playerX = canvasWidth / 2 - playerWidth / 2;
+    let playerY = canvasHeight - playerHeight - 20;
+
+    // Bullet setup
+    const bulletWidth = 5;
+    const bulletHeight = 20;
+    const bullets = [];
+
+    // Enemy setup
+    const enemyWidth = 40;
+    const enemyHeight = 40;
+    const enemies = [];
+
+    // Main game loop
+    let score = 0;
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      // Player
+      ctx.fillStyle = playerColor;
+      ctx.fillRect(playerX, playerY, playerWidth, playerHeight);
+
+      // Bullets
+      for (const bullet of bullets) {
+        ctx.fillStyle = bulletColor;
+        ctx.fillRect(bullet.x, bullet.y, bulletWidth, bulletHeight);
+        bullet.y -= bulletSpeed;
+      }
+
+      // Enemies
+      if (Math.random() < 0.02) {
+        enemies.push({ x: Math.random() * (canvasWidth - enemyWidth), y: 0 });
+      }
+
+      for (const enemy of enemies) {
+        ctx.fillStyle = enemyColor;
+        ctx.fillRect(enemy.x, enemy.y, enemyWidth, enemyHeight);
+        enemy.y += enemySpeed;
+      }
+
+      // Collision detection
+      for (const bullet of bullets) {
+        for (const enemy of enemies) {
+          if (
+            bullet.x >= enemy.x &&
+            bullet.x <= enemy.x + enemyWidth &&
+            bullet.y >= enemy.y &&
+            bullet.y <= enemy.y + enemyHeight
+          ) {
+            bullets.splice(bullets.indexOf(bullet), 1);
+            enemies.splice(enemies.indexOf(enemy), 1);
+            score++;
+          }
+        }
+      }
+
+      // Display score
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillText(`Score: ${score}`, 10, 20);
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") {
+        playerX -= playerSpeed;
+      }
+      if (event.key === "ArrowRight") {
+        playerX += playerSpeed;
+      }
+      if (event.key === " ") {
+        bullets.push({ x: playerX + playerWidth / 2 - bulletWidth / 2, y: playerY });
+      }
+    });
+
+    gameLoop();
+  </script>
+</body>
+</html>
